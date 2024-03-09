@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { interval, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { ApiService } from './api/api.service';
+// import { EmailService } from './api/email.service';
 
 @Component({
   selector: 'app-root',
@@ -13,84 +14,76 @@ import { ApiService } from './api/api.service';
 export class AppComponent {
   title = 'CI_yxt';
   date: Date[] | undefined;
-  days: number = 0;
-  hours: number = 0;
-  minutes: number = 5; // 默认为5分钟
+  // 設定要檢查的時間，分別為15點00分00秒、15點00分30秒及15點01分00秒
+  private checkTimes: { hour: number, minute: number, second: number }[] = [
+    { hour: 16, minute: 9, second: 0 },
+    { hour: 16, minute: 9, second: 30 },
+    { hour: 16, minute: 10, second: 0 }
+  ];
 
-  private systemUrl = 'http://163.18.42.233:4200/'; // 替换为实际的系统网站URL
-  // private systemUrl = 'https://www.nkust.edu.tw/'; // 替换为实际的系统网站URL
-  // private systemCheckSubscription: Subscription | undefined;
+  private systemCheckSubscription: Subscription | undefined;
 
-  constructor(private http: HttpClient, private apiService: ApiService) { }
+  constructor(private http: ApiService) { }
 
-  // ngOnInit() {
-  //   this.startSystemCheckPolling();
-  // }
-  // ngOnDestroy() {
-  //   if (this.systemCheckSubscription) {
-  //     this.systemCheckSubscription.unsubscribe();
-  //   }
-  // }
+  ngOnInit() {
+    // 在页面加载时立即检查
+    this.checkImmediately();
+    // 在每天的特定时段进行定时检查
+    this.startScheduledChecks();
+  }
+  ngOnDestroy() {
+    if (this.systemCheckSubscription) {
+      this.systemCheckSubscription.unsubscribe();
+    }
+  }
+
+  checkImmediately() {
+    this.checkSystemStatus();
+  }
+
+  // 开始定时检查
+  startScheduledChecks() {
+    // 获取当前时间
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    const currentSecond = now.getSeconds();
+
+    // 定义要进行检查的时间点，每天早上8点0分0秒、下午1点0分0秒、晚上6点0分0秒
+    const checkTimes = [
+      { hour: 17, minute: 12, second: 0 },
+      { hour: 17, minute: 12, second: 30 },
+      { hour: 17, minute: 13, second: 0 }
+    ];
+
+    // 在特定的时间点进行检查
+    for (const checkTime of checkTimes) {
+      // 将设定的时间点转换为秒数
+      const checkTimeInSeconds = checkTime.hour * 3600 + checkTime.minute * 60 + checkTime.second;
+      // 将当前时间转换为秒数
+      const currentTimeInSeconds = currentHour * 3600 + currentMinute * 60 + currentSecond;
+
+      if (currentTimeInSeconds <= checkTimeInSeconds) {
+        // 如果当前时间小于或等于设定的时间点，计算距离该时间点的毫秒数
+        const delayInSeconds = checkTimeInSeconds - currentTimeInSeconds;
+        const delayInMilliseconds = delayInSeconds * 1000;
+        setTimeout(() => {
+          this.checkSystemStatus();
+        }, delayInMilliseconds);
+      }
+    }
+  }
 
   checkSystemStatus() {
-    return this.http.get(this.systemUrl);
+    this.http.checkSystemStatus().subscribe(
+      () => console.log('系统正常运行'),
+      error => {
+        console.error('系统出现问题:', error);
+      }
+    );
   }
 
-  startSystemCheckPolling() {
-    // // 每5分钟执行一次检查，可以根据需要调整间隔时间
-    // interval(1 * 60 * 1000)
-    //   .pipe(
-    //     switchMap(() => this.checkSystemStatus())
-    //   )
-    //   .subscribe(
-    //     () => console.log('系统正在运行'), // 在控制台输出系统正在运行的信息
-    //     error => {
-    //       console.error('系统出现问题:', error); // 在控制台输出系统出现问题的信息
-    //       // 在这里可以添加发送报告的逻辑，例如使用邮件服务发送报告
-    //     }
-    //   );
-
-    const intervalTime = (this.days * 24 * 60 * 60 + this.hours * 60 * 60 + this.minutes * 60) * 1000; // 将输入的天、小时、分钟转换为毫秒
-    // if (this.systemCheckSubscription) {
-    //   this.systemCheckSubscription.unsubscribe(); // 取消先前的订阅
-    // }
-
-    // this.systemCheckSubscription = interval(intervalTime)
-    //   .pipe(
-    //     switchMap(() => this.checkSystemStatus())
-    //   )
-    //   .subscribe(
-    //     () => console.log('系统正在运行'), // 在控制台输出系统正在运行的信息
-    //     error => {
-    //       console.error('系统出现问题:', error); // 在控制台输出系统出现问题的信息
-    //       // 在这里可以添加发送报告的逻辑，例如使用邮件服务发送报告
-    //     }
-    //   );
-
-    interval(intervalTime)
-      .pipe(
-        switchMap(() => this.checkSystemStatus())
-      )
-      .subscribe(
-        (response: any) => {
-          // 响应成功，根据状态码进行相应的处理
-          if (response.status === 200) {
-            console.log('系统正在运行');
-          } else if (response.status === 404) {
-            console.error('网页找不到');
-          } else if (response.status === 405) {
-            console.error('前端错误');
-          } else if (response.status === 500) {
-            console.error('后端错误');
-          } else {
-            console.error('未知错误');
-          }
-        },
-        error => {
-          console.error('系统出现问题:', error); // 在控制台输出系统出现问题的信息
-          // 在这里可以添加发送报告的逻辑，例如使用邮件服务发送报告
-        }
-      );
-  }
-
+  // sendEmail(subject: string, body: string) {
+  //   this.emailService.sendEmail(subject, body);
+  // }
 }
