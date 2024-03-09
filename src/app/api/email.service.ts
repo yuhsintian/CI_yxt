@@ -1,5 +1,20 @@
-// import { Injectable } from '@angular/core';
-// import * as nodemailer from 'nodemailer';
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from "rxjs";
+import * as nodemailer from 'nodemailer';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class EmailService {
+  constructor(private http: HttpClient) { }
+
+  sendEmail(): Observable<any> {
+    const url = 'http://163.18.42.233:4200/'; // 替换为后端API的URL
+    // const url = 'https://www.nkust.edu.tw/'; // 替换为后端API的URL
+    return this.http.post(url, {});
+  }
+}
 
 // @Injectable({
 //   providedIn: 'root'

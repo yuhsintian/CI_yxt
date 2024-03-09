@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { interval, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { ApiService } from './api/api.service';
-// import { EmailService } from './api/email.service';
+import { EmailService } from './api/email.service';
 
 @Component({
   selector: 'app-root',
@@ -23,7 +23,7 @@ export class AppComponent {
 
   private systemCheckSubscription: Subscription | undefined;
 
-  constructor(private http: ApiService) { }
+  constructor(private http: ApiService,private emailService: EmailService) { }
 
   ngOnInit() {
     // 在页面加载时立即检查
@@ -79,6 +79,11 @@ export class AppComponent {
       () => console.log('系统正常运行'),
       error => {
         console.error('系统出现问题:', error);
+        // 发送邮件通知
+      this.emailService.sendEmail().subscribe(
+        () => console.log('邮件发送成功'),
+        err => console.error('邮件发送失败', err)
+      );
       }
     );
   }
