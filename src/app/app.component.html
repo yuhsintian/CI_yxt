@@ -1,14 +1,101 @@
 <router-outlet></router-outlet>
 
 <div class="container">
+  <p-card>
+    <h1 class="card flex justify-content-center">檢查</h1>
+    <div class="card flex justify-content-center">
+      <p-button label="立即檢查" (click)="checkImmediately()"></p-button>
+    </div>
+    <p></p>
+
+    <!-- 下拉菜单和保存按钮 -->
+    <div class="card flex justify-content-center" *ngFor="let time of Times; let i = index">
+      <input type="number" id="hour{{i}}" [(ngModel)]="selectedTimes[i].hour" min="0" max="23">
+      <label for="hour{{i}}">時</label>
+      <input type="number" id="minute{{i}}" [(ngModel)]="selectedTimes[i].minute" min="0" max="59">
+      <label for="minute{{i}}">分</label>
+      <input type="number" id="second{{i}}" [(ngModel)]="selectedTimes[i].second" min="0" max="59">
+      <label for="second{{i}}">秒</label>
+    </div>
+    <p></p>
+    <p-button class="card flex justify-content-center" (click)="onSaveTimes()">定時檢查</p-button>
+    <p></p>
+    <p-button class="card flex justify-content-center"  (click)="sendLineNotification()">發送 Line 通知</p-button>
+  </p-card>
+</div>
+
+<!-- <router-outlet></router-outlet>
+
+<div class="container">
 
   <p-card>
     <h1 class="card flex justify-content-center">定時檢查</h1>
 
+      <div class="card flex justify-content-center">
+      <p>第一時段</p>
+      <p-inputNumber [(ngModel)]="morningHour" [style]="{'width': '4rem'}" [showButtons]="true" buttonLayout="vertical"
+        spinnerMode="vertical" inputId="morningHour" decrementButtonClass="p-button-secondary"
+        incrementButtonClass="p-button-secondary" incrementButtonIcon="pi pi-plus"
+        decrementButtonIcon="pi pi-minus"></p-inputNumber>
+      <p-inputNumber [(ngModel)]="morningMinute" [style]="{'width': '4rem'}" [showButtons]="true"
+        buttonLayout="vertical" spinnerMode="vertical" inputId="morningMinute" decrementButtonClass="p-button-secondary"
+        incrementButtonClass="p-button-secondary" incrementButtonIcon="pi pi-plus"
+        decrementButtonIcon="pi pi-minus"></p-inputNumber>
+      <p-inputNumber [(ngModel)]="morningSecond" [style]="{'width': '4rem'}" [showButtons]="true"
+        buttonLayout="vertical" spinnerMode="vertical" inputId="morningSecond" decrementButtonClass="p-button-secondary"
+        incrementButtonClass="p-button-secondary" incrementButtonIcon="pi pi-plus"
+        decrementButtonIcon="pi pi-minus"></p-inputNumber>
 
-    <div class="card flex justify-content-center">
+      <p>第二時段</p>
+      <p-inputNumber [(ngModel)]="noonHour" [style]="{'width': '4rem'}" [showButtons]="true" buttonLayout="vertical"
+        spinnerMode="vertical" inputId="noonHour" decrementButtonClass="p-button-secondary"
+        incrementButtonClass="p-button-secondary" incrementButtonIcon="pi pi-plus"
+        decrementButtonIcon="pi pi-minus"></p-inputNumber>
+      <p-inputNumber [(ngModel)]="noonMinute" [style]="{'width': '4rem'}" [showButtons]="true" buttonLayout="vertical"
+        spinnerMode="vertical" inputId="noonMinute" decrementButtonClass="p-button-secondary"
+        incrementButtonClass="p-button-secondary" incrementButtonIcon="pi pi-plus"
+        decrementButtonIcon="pi pi-minus"></p-inputNumber>
+      <p-inputNumber [(ngModel)]="noonSecond" [style]="{'width': '4rem'}" [showButtons]="true" buttonLayout="vertical"
+        spinnerMode="vertical" inputId="noonSecond" decrementButtonClass="p-button-secondary"
+        incrementButtonClass="p-button-secondary" incrementButtonIcon="pi pi-plus"
+        decrementButtonIcon="pi pi-minus"></p-inputNumber>
+
+      <p>第三時段</p>
+      <p-inputNumber [(ngModel)]="eveningHour" [style]="{'width': '4rem'}" [showButtons]="true" buttonLayout="vertical"
+        spinnerMode="vertical" inputId="eveningHour" decrementButtonClass="p-button-secondary"
+        incrementButtonClass="p-button-secondary" incrementButtonIcon="pi pi-plus"
+        decrementButtonIcon="pi pi-minus"></p-inputNumber>
+      <p-inputNumber [(ngModel)]="eveningMinute" [style]="{'width': '4rem'}" [showButtons]="true"
+        buttonLayout="vertical" spinnerMode="vertical" inputId="eveningMinute" decrementButtonClass="p-button-secondary"
+        incrementButtonClass="p-button-secondary" incrementButtonIcon="pi pi-plus"
+        decrementButtonIcon="pi pi-minus"></p-inputNumber>
+      <p-inputNumber [(ngModel)]="eveningSecond" [style]="{'width': '4rem'}" [showButtons]="true"
+        buttonLayout="vertical" spinnerMode="vertical" inputId="eveningSecond" decrementButtonClass="p-button-secondary"
+        incrementButtonClass="p-button-secondary" incrementButtonIcon="pi pi-plus"
+        decrementButtonIcon="pi pi-minus"></p-inputNumber>
+    </div> -->
+
+<!-- <div class="card flex justify-content-center">
+      <p-inputNumber [(ngModel)]="days" [style]="{'width': '4rem'}" [showButtons]="true" buttonLayout="vertical"
+        spinnerMode="vertical" inputId="days" decrementButtonClass="p-button-secondary"
+        incrementButtonClass="p-button-secondary" incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus"
+        class="field col-1"></p-inputNumber>
+      <label>天</label>
+      <p-inputNumber [(ngModel)]="hours" [style]="{'width': '4rem'}" [showButtons]="true" buttonLayout="vertical"
+        spinnerMode="vertical" inputId="hours" decrementButtonClass="p-button-secondary"
+        incrementButtonClass="p-button-secondary" incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus"
+        class="field col-1"></p-inputNumber>
+      <label>小時</label>
+      <p-inputNumber [(ngModel)]="minutes" [style]="{'width': '4rem'}" [showButtons]="true" buttonLayout="vertical"
+        spinnerMode="vertical" inputId="minutes" decrementButtonClass="p-button-secondary"
+        incrementButtonClass="p-button-secondary" incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus"
+        class="field col-1"></p-inputNumber>
+      <label>分鐘</label>
+    </div> -->
+
+<!-- <div class="card flex justify-content-center">
       <p-button label="立即檢查" (click)="checkImmediately()"></p-button>
     </div>
   </p-card>
 </div>
-
+ -->

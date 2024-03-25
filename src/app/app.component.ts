@@ -5,6 +5,9 @@ import { interval, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { ApiService } from './api/api.service';
 import { EmailService } from './api/email.service';
+import { LineNotifyService } from './api/linenotify.service';
+
+
 
 @Component({
   selector: 'app-root',
@@ -14,23 +17,41 @@ import { EmailService } from './api/email.service';
 export class AppComponent {
   title = 'CI_yxt';
   date: Date[] | undefined;
-  // 設定要檢查的時間，分別為15點00分00秒、15點00分30秒及15點01分00秒
-  private checkTimes: { hour: number, minute: number, second: number }[] = [
-    { hour: 16, minute: 9, second: 0 },
-    { hour: 16, minute: 9, second: 30 },
-    { hour: 16, minute: 10, second: 0 }
+  Times = [
+    { name: '時段1', code: 'time1' },
+    { name: '時段2', code: 'time2' },
+    { name: '時段3', code: 'time3' }
   ];
+  selectedTimes: { hour: number, minute: number, second: number }[] = [
+    { hour: 0, minute: 0, second: 0 },
+    { hour: 0, minute: 0, second: 0 },
+    { hour: 0, minute: 0, second: 0 }
+  ];
+  private checkTimes: { hour: number, minute: number, second: number }[] = [];
+
+  // // 設定要檢查的時間，分別為15點00分00秒、15點00分30秒及15點01分00秒
+  // private checkTimes: { hour: number, minute: number, second: number }[] = [
+  //   { hour: 14, minute: 10, second: 0 },
+  //   { hour: 14, minute: 10, second: 30 },
+  //   { hour: 14, minute: 11, second: 0 }
+  // ];
 
   private systemCheckSubscription: Subscription | undefined;
+  // 使用者选择的时间
+  // selectedTimes: { hour: number, minute: number }[] = [];
+  timeOptions: any[] | undefined;
 
-  constructor(private http: ApiService,private emailService: EmailService) { }
+  constructor(private http: ApiService, private emailService: EmailService, private LineNotifyService: LineNotifyService) { }
 
-  ngOnInit() {
+  ngOnInit(): void {
+
     // 在页面加载时立即检查
     this.checkImmediately();
     // 在每天的特定时段进行定时检查
     this.startScheduledChecks();
+
   }
+
   ngOnDestroy() {
     if (this.systemCheckSubscription) {
       this.systemCheckSubscription.unsubscribe();
@@ -41,54 +62,83 @@ export class AppComponent {
     this.checkSystemStatus();
   }
 
-  // 开始定时检查
+  //如果選擇的時間與當前時間符合，立即檢查狀態
   startScheduledChecks() {
-    // 获取当前时间
-    const now = new Date();
-    const currentHour = now.getHours();
-    const currentMinute = now.getMinutes();
-    const currentSecond = now.getSeconds();
+    for (const checkTime of this.checkTimes) {
+      const now = new Date();
+      const currentHour = now.getHours();
+      const currentMinute = now.getMinutes();
+      const currentSecond = now.getSeconds();
 
-    // 定义要进行检查的时间点，每天早上8点0分0秒、下午1点0分0秒、晚上6点0分0秒
-    const checkTimes = [
-      { hour: 17, minute: 12, second: 0 },
-      { hour: 17, minute: 12, second: 30 },
-      { hour: 17, minute: 13, second: 0 }
-    ];
-
-    // 在特定的时间点进行检查
-    for (const checkTime of checkTimes) {
-      // 将设定的时间点转换为秒数
       const checkTimeInSeconds = checkTime.hour * 3600 + checkTime.minute * 60 + checkTime.second;
-      // 将当前时间转换为秒数
       const currentTimeInSeconds = currentHour * 3600 + currentMinute * 60 + currentSecond;
 
       if (currentTimeInSeconds <= checkTimeInSeconds) {
-        // 如果当前时间小于或等于设定的时间点，计算距离该时间点的毫秒数
         const delayInSeconds = checkTimeInSeconds - currentTimeInSeconds;
         const delayInMilliseconds = delayInSeconds * 1000;
         setTimeout(() => {
           this.checkSystemStatus();
         }, delayInMilliseconds);
+
       }
     }
+
   }
 
+  // checkSystemStatus() {
+  //   this.http.checkSystemStatus().subscribe(
+  //     () => console.log('系統正常運行：' + 'current time:' + new Date()),
+
+  //     error => {
+  //       console.error('系統出現問題:', error);
+  //       console.log('current time:' + new Date());
+  //       // 发送邮件通知
+  //       this.emailService.sendEmail().subscribe(
+  //         () => console.log('郵件發送成功'),
+  //         err => console.error('郵件發送失敗', err)
+  //       );
+  //     }
+  //   );
+  // }
+
+
+  //檢查狀態
   checkSystemStatus() {
-    this.http.checkSystemStatus().subscribe(
-      () => console.log('系统正常运行'),
-      error => {
-        console.error('系统出现问题:', error);
-        // 发送邮件通知
-      this.emailService.sendEmail().subscribe(
-        () => console.log('邮件发送成功'),
-        err => console.error('邮件发送失败', err)
-      );
-      }
-    );
+    this.http.checkSystemStatus().then(data => {
+      console.log('System status:', data);
+      console.log('系統正常運行：' + 'current time:' + new Date());
+      // 在此处处理返回的数据
+    }).catch(error => {
+      console.error('系統出現問題:', error);
+      console.log('current time:' + new Date());
+    });
   }
 
+  //儲存新選擇的時間段
+  onSaveTimes() {
+    // 清空原有的检查时间数组
+    this.checkTimes = [];
+    // 添加用户选择的时间到检查时间数组中
+    for (const selectedTime of this.selectedTimes) {
+      this.checkTimes.push({
+        hour: selectedTime.hour,
+        minute: selectedTime.minute,
+        second: selectedTime.second
+      });
+    }
+    console.log('selected Time:', this.checkTimes)
+    // 开始使用新的时间进行检查
+    this.startScheduledChecks();
+  }
+
+  //郵件
   // sendEmail(subject: string, body: string) {
   //   this.emailService.sendEmail(subject, body);
   // }
+
+  //LINE告警
+  sendLineNotification() {
+    const message = 'LINE告警！';
+    this.LineNotifyService.sendLineNotification(message);
+  }
 }
