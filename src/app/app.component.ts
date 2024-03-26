@@ -88,9 +88,9 @@ export class AppComponent {
 
   //檢查系統狀態
   checkSystemStatus() {
-    this.http.checkSystemStatus().then(data => {
+    this.http.checkSystemStatus().then(status => {
       console.log('系統正常運行：' + 'current time:' + new Date());
-      console.log('System status:', data);
+      console.log('System status:', status);
       //LINE告警
       this.sendLineNotification('MeGlobe系統運行成功');
       // 在此处处理返回的数据
@@ -129,9 +129,9 @@ export class AppComponent {
 
   //LINE告警
   sendLineNotification(message: string) {
-    // const message = 'MeGlobe系統運行成功';
+    //發送 LINE Notify 通知，並將 message 作為參數
     this.LineNotifyService.sendLineNotification(message)
-      .then(status => {
+      .then(status => { //當通知成功發送時，會獲得表示通知狀態的status，並將其記錄到控制台中。
         console.log('發送通知的狀態碼:', status);
         // 在這裡可以根據 HTTP 狀態碼執行相應的操作
         console.log('系統檢查結果已由Line Notify發送通知');
