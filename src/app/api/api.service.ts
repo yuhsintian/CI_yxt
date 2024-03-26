@@ -7,8 +7,8 @@ import { Observable } from "rxjs";
   providedIn: 'root'
 })
 export class ApiService {
-  // private BaseUrl: string = 'http://163.18.42.233:4200/';
-  private BaseUrl: string = 'http://localhost:57307/';
+  private BaseUrl: string = 'http://163.18.42.233:4200/';
+  // private BaseUrl: string = 'http://localhost:57307/';
   // private BaseUrl : string = 'https://www.nkust.edu.tw/'; // 替换为实际的系统网站URL
   constructor(private http: HttpClient) { }
 

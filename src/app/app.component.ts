@@ -91,10 +91,8 @@ export class AppComponent {
     this.http.checkSystemStatus().then(data => {
       console.log('系統正常運行：' + 'current time:' + new Date());
       console.log('System status:', data);
-      // 根據 HTTP 狀態碼決定發送的消息
-      const message = (data === 200) ? 'MeGlobe系統運行成功' : 'MeGlobe系統運行失敗';
       //LINE告警
-      this.sendLineNotification(message);
+      this.sendLineNotification('MeGlobe系統運行成功');
       // 在此处处理返回的数据
     }).catch(error => {
       console.error('系統出現問題:', error);
