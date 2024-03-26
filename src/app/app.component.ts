@@ -6,7 +6,7 @@ import { switchMap } from 'rxjs/operators';
 import { ApiService } from './api/api.service';
 import { EmailService } from './api/email.service';
 import { LineNotifyService } from './api/linenotify.service';
-
+import { LogService } from './api/log.service';
 
 
 @Component({
@@ -41,7 +41,9 @@ export class AppComponent {
   // selectedTimes: { hour: number, minute: number }[] = [];
   timeOptions: any[] | undefined;
 
-  constructor(private http: ApiService, private emailService: EmailService, private LineNotifyService: LineNotifyService) { }
+  constructor(private http: ApiService, private emailService: EmailService, private LineNotifyService: LineNotifyService, private logService: LogService) {
+    this.checkTimes = JSON.parse(localStorage.getItem('selectedTimes') || '[]');
+  }
 
   ngOnInit(): void {
 
@@ -82,35 +84,23 @@ export class AppComponent {
 
       }
     }
-
   }
 
-  // checkSystemStatus() {
-  //   this.http.checkSystemStatus().subscribe(
-  //     () => console.log('系統正常運行：' + 'current time:' + new Date()),
-
-  //     error => {
-  //       console.error('系統出現問題:', error);
-  //       console.log('current time:' + new Date());
-  //       // 发送邮件通知
-  //       this.emailService.sendEmail().subscribe(
-  //         () => console.log('郵件發送成功'),
-  //         err => console.error('郵件發送失敗', err)
-  //       );
-  //     }
-  //   );
-  // }
-
-
-  //檢查狀態
+  //檢查系統狀態
   checkSystemStatus() {
     this.http.checkSystemStatus().then(data => {
-      console.log('System status:', data);
       console.log('系統正常運行：' + 'current time:' + new Date());
+      console.log('System status:', data);
+      // 根據 HTTP 狀態碼決定發送的消息
+      const message = (data === 200) ? 'MeGlobe系統運行成功' : 'MeGlobe系統運行失敗';
+      //LINE告警
+      this.sendLineNotification(message);
       // 在此处处理返回的数据
     }).catch(error => {
       console.error('系統出現問題:', error);
       console.log('current time:' + new Date());
+      //LINE告警
+      this.sendLineNotification('MeGlobe系統運行失敗');
     });
   }
 
@@ -127,6 +117,9 @@ export class AppComponent {
       });
     }
     console.log('selected Time:', this.checkTimes)
+    //將選取的時間儲存到localStorage中
+    localStorage.setItem('selectedTimes', JSON.stringify(this.checkTimes));
+    this.logService.log('User selected time');
     // 开始使用新的时间进行检查
     this.startScheduledChecks();
   }
@@ -137,8 +130,23 @@ export class AppComponent {
   // }
 
   //LINE告警
-  sendLineNotification() {
-    const message = 'LINE告警！';
-    this.LineNotifyService.sendLineNotification(message);
+  sendLineNotification(message: string) {
+    // const message = 'MeGlobe系統運行成功';
+    this.LineNotifyService.sendLineNotification(message)
+      .then(status => {
+        console.log('發送通知的狀態碼:', status);
+        // 在這裡可以根據 HTTP 狀態碼執行相應的操作
+        console.log('系統檢查結果已由Line Notify發送通知');
+      })
+      .catch(error => {
+        console.error('系統檢查結果通知失敗:', error);
+        // 處理發送通知失敗的情況
+        if (error instanceof Error) {
+          console.error('發送 Line Notify 通知時發生錯誤:', error.message);
+        } else {
+          console.error('未知的錯誤:', error);
+        }
+      });
   }
+
 }

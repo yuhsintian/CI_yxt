@@ -1,6 +1,9 @@
 {
   "/api": {
-    "target": "http://163.18.42.233:4200",
-    "secure": false
+    "target": "https://notify-api.line.me",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
   }
 }
+
